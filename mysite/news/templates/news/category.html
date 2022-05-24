@@ -20,12 +20,10 @@
       <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Главная страница</a></li>
       <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Добавить новость</a></li>
     </ul>
-    </form>
   </div>
 </nav>
 
 <div class="container mt-3">
-  <h1>{{ title }}</h1>
 <!--  переменные выводятся в двойных фигурных скобках-->
   <div class="row">
 
@@ -33,7 +31,6 @@
         <div class="list-group">
             {% for item in categories %}
             <a href="{% url 'category' item.pk%}" class="list-group-item list-group-item-action">{{ item.title }}</a>
-<!--          обращаемся к url category, которую мы задали в name в news/url.pym, а вторым аргументов передает pk-->
             {% endfor %}
           </div>
     </div>
@@ -43,7 +40,7 @@
 <!--      это тег, знак процента и т.д, самые известные это иф. фор. блок. теги создают объекты для выводы и с помощью переменных(директив) выводят-->
       <div class="card mb-3">
         <div class="card-header">
-          Категория: <a href="{% url 'category' item.category.pk %}">{{item.category}}</a>
+          Категория: {{item.category}}
         </div>
         <div class="card-body">
           <div class="media">
