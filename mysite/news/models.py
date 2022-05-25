@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class News(models.Model):
@@ -14,6 +15,9 @@ class News(models.Model):
     # 'Category' указывается строкой, так как она модель, которая создана после класса News, в противном случае ссылку
     # тоже можно разместить"
 
+    def get_absolute_url(self):
+        return reverse('view_news', kwargs={'news_id': self.pk})
+
     def __str__(self):
         return self.title
 
@@ -26,6 +30,9 @@ class News(models.Model):
 class Category(models.Model):
     title = models.CharField(max_length=150, db_index=True, verbose_name='Наименование категории')
     # db_index ставиться True для более быстрого поиска для этого поля
+
+    def get_absolute_url(self):
+        return reverse('category', kwargs={'category_id': self.pk})
 
     def __str__(self):
         return self.title

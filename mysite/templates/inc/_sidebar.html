@@ -1,0 +1,16 @@
+{% load news_tags %}
+{% comment %}
+<div class="list-group">
+    {% get_list_categories as categories %}
+<!--    созданный get_list_categories с помощью декоратора @register.simple_tag в news_tags.py -->
+    {% for item in categories %}
+    <a href="{% url 'category' item.pk%}" class="list-group-item list-group-item-action">{{ item.title }}</a>
+<!--          обращаемся к url category, которую мы задали в name в news/url.pym, а вторым аргументов передает pk-->
+    {% endfor %}
+</div>
+<!--данный простой тег работает с помощью простого тега, где объем кода больше, в случае ниже написан просто один короткий тег show_categories-->
+
+<br>
+{% endcomment %}
+
+{% show_categories %}
