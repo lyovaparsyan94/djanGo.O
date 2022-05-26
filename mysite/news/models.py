@@ -1,5 +1,5 @@
 from django.db import models
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
 
 class News(models.Model):
@@ -16,7 +16,7 @@ class News(models.Model):
     # тоже можно разместить"
 
     def get_absolute_url(self):
-        return reverse('view_news', kwargs={'news_id': self.pk})
+        return reverse_lazy('view_news', kwargs={'news_id': self.pk})
 
     def __str__(self):
         return self.title
@@ -32,7 +32,7 @@ class Category(models.Model):
     # db_index ставиться True для более быстрого поиска для этого поля
 
     def get_absolute_url(self):
-        return reverse('category', kwargs={'category_id': self.pk})
+        return reverse_lazy('category', kwargs={'category_id': self.pk})
 
     def __str__(self):
         return self.title
