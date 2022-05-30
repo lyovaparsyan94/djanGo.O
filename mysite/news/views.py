@@ -29,8 +29,10 @@ def add_news(request):
     if request.method == 'POST':
         form = NewsForm(request.POST)
         if form.is_valid():
+            """после подключения наследования в формс.ру используем удобный метод news = form.save()"""
             # print(form.cleaned_data)
-            news = News.objects.create(**form.cleaned_data)
+            # news = News.objects.create(**form.cleaned_data)
+            news = form.save()
             return redirect(news)
     else:
         form = NewsForm()
