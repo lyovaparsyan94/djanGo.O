@@ -16,7 +16,7 @@ class News(models.Model):
     # тоже можно разместить"
 
     def get_absolute_url(self):
-        return reverse_lazy('view_news', kwargs={'news_id': self.pk})
+        return reverse_lazy('view_news', kwargs={'pk': self.pk})
 
     def __str__(self):
         return self.title
