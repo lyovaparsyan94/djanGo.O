@@ -2,6 +2,7 @@
 <!--    созданный get_list_categories с помощью декоратора @register.simple_tag в news_tags.py -->
     {% for item in categories %}
     <a href="{{ item.get_absolute_url }}" class="list-group-item list-group-item-action">{{ item.title }}</a>
+        <span class="badge badge-primary badge-pill">{{ item.cnt }}</span>
 <!--          обращаемся к url category, которую мы задали в name в news/url.pym, а вторым аргументов передает pk-->
     {% endfor %}
 </div>
