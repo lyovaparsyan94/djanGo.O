@@ -1,56 +1,115 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DeleteView, CreateView
 from django.urls import reverse_lazy
 from .models import News, Category
-from .forms import NewsForm
+from .forms import NewsForm, UserRegisterForm, UserLoginForm
+from .utils import *
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.contrib.auth import login, logout
 
 
-class HomeNews(ListView):
+def register(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            # Возникает вопрос когда после регистрации человек перенаправялется на страницу логина, будет лучше сразу
+            # его авторизировать, поэтому в login(request, user) передадим данные юзера и объект запроса и
+            # перенаправить на home:
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Вы успешно зарегистрировались')
+            return redirect('home')
+        else:
+            messages.error(request, 'Ошибка регистрации')
+
+    else:
+        form = UserRegisterForm()
+    return render(request, 'news/register.html', {'form': form})
+
+
+def user_login(request):
+    if request.method == 'POST':
+        form = UserLoginForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UserLoginForm
+    return render(request, 'news/login.html', {'form': form})
+
+
+def user_logout(request):
+    logout(request)
+    return redirect('login')
+
+
+def test(request):
+    # пример реализации пагинации с помощью функций, но с помощью классов быстрее и меньше кода
+    objects = ['john1', 'bob2', 'marli3', 'pyos4', 'nepyos5', 'karina6', 'marina7']
+    paginator = Paginator(objects, 2)
+    page_num = request.GET.get('page', 1)
+    page_objects = paginator.get_page(page_num)
+    return render(request, 'news/test.html', {'page_obj': page_objects})
+
+
+class HomeNews(MyMixin, ListView):
+    # пример реализации пагинации с помощью  классов
     """определяем модель, из которой наследуем модель"""
     model = News
     template_name = 'news/home_news_list.html'
     context_object_name = "news"
     allow_empty = False
+    mixin_prop = 'hello word'
+    paginate_by = 2
 
     # extra_context = {'title': 'Главная'} #это в случае статичных данных, если динамичные данные будут -> def get_context_data
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(HomeNews, self).get_context_data(**kwargs)
-        context['title'] = 'Главная страница'
+        context['title'] = self.get_upper('Главная страница')
+        context['mixin_proc'] = self.get_proc()
         return context
 
     def get_queryset(self):  # для фильтрации, не нужно больше писать фильтры или news = News.objects.all()
-        return News.objects.filter(is_published=True)
+        return News.objects.filter(is_published=True).select_related('category')
 
 
-class NewsByCategory(ListView):
+class NewsByCategory(MyMixin, ListView):
     model = News
     template_name = 'news/home_news_list.html'
     context_object_name = "news"
+    # queryset = News.objects.select_related('category')
     allow_empty = False
+    paginate_by = 2
 
     def get_queryset(self):
-        return News.objects.filter(category_id=self.kwargs['category_id'], is_published=True)
+        return News.objects.filter(category_id=self.kwargs['category_id'], is_published=True).select_related('category')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = Category.objects.get(pk=self.kwargs['category_id'])
+        context['title'] = self.get_upper(Category.objects.get(pk=self.kwargs['category_id']))
         return context
 
 
-class ViewNews(DeleteView):
+class ViewNews(MyMixin, DeleteView):
     model = News
     context_object_name = 'news_item'
     # pk_url_kwarg = 'news_id'
     # template_name = 'news/news_confirm_delete.html'
 
 
-class CreateNews(CreateView):
+class CreateNews(LoginRequiredMixin, CreateView):
     form_class = NewsForm
     template_name = 'news/add_news.html'
+    # login_url = '/admin/' #можно также сделать вот так login_url = reverse_lazy('home')
+    raise_exception = True
+
+
 #     на самом деле здесь Джанго ждет функцию, которую мы создали в models def get_absolute_url(self): или
 #     success_url = reverse_lazy('home') делает редирект на домашнюю стр(но мы будем использовать(get_absolute_url)
-
 
 
 # def index(request):
@@ -66,7 +125,6 @@ def get_category(request, category_id):
     news = News.objects.filter(category_id=category_id)
     category = Category.objects.get(pk=category_id)
     return render(request, 'news/category.html', {'news': news, 'category': category})
-
 
 # def view_news(request, news_id):
 #     # news_item = News.objects.get(pk=news_id)
@@ -86,5 +144,4 @@ def get_category(request, category_id):
 #     else:
 #         form = NewsForm()
 #     return render(request, 'news/add_news.html', {'form': form})
-#Мы закомментировали эту функцию потому что всего 3 строки class CreateNews могут полностью заменить эту функцию
-
+# Мы закомментировали эту функцию потому что всего 3 строки class CreateNews могут полностью заменить эту функцию

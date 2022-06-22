@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+{{ mixin_proc }}
 {% for item in news %}
 <!-- наследуетс от HomeClass, обратить внимание на object_list, заменен на news, для этого в views.ру изменили context_object_name = "news" -->
 <div class="card mb-3">
